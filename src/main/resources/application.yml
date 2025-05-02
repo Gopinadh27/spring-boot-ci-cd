@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: spring-boot-ci-cd
+
+  datasource:
+    url: ${MYSQL_DB_URL}/${MYSQL_DB_NAME}
+    username: ${MYSQL_DB_USERNAME}
+    password: ${MYSQL_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      dialect: org.hibernate.dialect.MYSQL8Dialect
+
+server:
+  port: 2000
