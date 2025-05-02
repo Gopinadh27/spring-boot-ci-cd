@@ -1,13 +1,7 @@
-# Stage 1: Build (optional if you build outside Docker)
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
-
-# Stage 2: Run
 FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
 VOLUME /tmp
 ARG JAR_FILE=target/*.jar
-COPY --from=builder /app/${JAR_FILE} app.jar
+COPY  /app/${JAR_FILE} app.jar
 EXPOSE 2000
 ENTRYPOINT ["java", "-jar", "/app.jar"]
