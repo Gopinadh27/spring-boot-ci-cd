@@ -1,0 +1,6 @@
+services:
+  user-service:
+    image: replaceImageTag
+    container_name: user_service
+    ports:
+      - "8080:2000"

@@ -63,6 +63,27 @@ pipeline {
             }
         }
 
+        stage ('Update Deployment file') {
+            environment {
+                GIT_REPO_NAME = 'spring-boot-ci-cd'
+                GIT_USER_NAME='Gopinadh27'
+            }
+            steps {
+                withCredentials([string(credentialsId:'github', variable:'GIT_HUB_TOKEN')]) {
+                    sh '''
+                       git config user.email "gopinadh@git.com"
+                       git config user.name  "gopinadh"
+                       BUILD_NUMBER = $BUILD_NUMBER
+                       sed -i 's/replaceImageTag/${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}/g' spring-boot-ci-cd/deployment.yml
+                       git add spring-boot-ci-cd/deployment.yml
+                       git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                       git push https://${GIT_HUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                       echo "deployment file updated successfully"
+                    '''
+                }
+            }
+        }
+
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up Docker image...'
