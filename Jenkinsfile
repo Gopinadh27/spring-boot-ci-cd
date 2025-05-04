@@ -71,10 +71,11 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId:'github', variable:'GIT_HUB_TOKEN')]) {
                     sh '''
+                       cd spring-boot-ci-cd
                        git config user.email "gopinadh@git.com"
                        git config user.name  "gopinadh"
                        BUILD_NUMBER = $BUILD_NUMBER
-                       sh 'cd spring-boot-ci-cd && sed -i 's/replaceImageTag/${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}/g' deployment.yml
+                       sed -i 's/replaceImageTag/${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}/g' deployment.yml
                        git add deployment.yml
                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                        git push https://${GIT_HUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
