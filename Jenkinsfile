@@ -37,7 +37,9 @@ pipeline {
         stage('Static Code Analysis') {
             steps {
                 withCredentials([string(credentialsId:'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh 'mvn sonar:sonar -Dsonar.login=${SONAR_AUTH_TOKEN} -Dsonar.host.url=${SONAR_URL}'
+                    echo "Present Working Directory"
+                    sh 'pwd'
+                    sh 'cd spring-boot-ci-cd && mvn sonar:sonar -Dsonar.login=${SONAR_AUTH_TOKEN} -Dsonar.host.url=${SONAR_URL}'
                 }
             }
         }
@@ -45,7 +47,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image: ${IMAGE_NAME} with tag ${TAG}"
-                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} spring-boot-ci-cd"
+                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} ."
             }
         }
 
