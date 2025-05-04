@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME = 'spring-boot-ci-cd'
         DOCKER_REGISTRY = 'docker.io/ctli'
         TAG = "${env.BUILD_NUMBER}"
-        SONAR_URL = 'http://localhost:9000'
+        SONAR_URL = 'http://sonarqube:9000'
     }
 
     stages {
