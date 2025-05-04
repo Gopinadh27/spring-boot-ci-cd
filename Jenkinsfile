@@ -29,8 +29,7 @@ pipeline {
                 echo 'Building Spring Boot application...'
                 sh '''
                     cd spring-boot-ci-cd
-                    chmod 777 mvnw
-                    ./mvnw clean package -DskipTests
+                    mvn clean package -DskipTests
                 '''
             }
         }
@@ -38,7 +37,7 @@ pipeline {
         stage('Static Code Analysis') {
             steps {
                 withCredentials([string(credentialsId:'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh './mvnw sonar:sonar -Dsonar.login=${SONAR_AUTH_TOKEN} -Dsonar.host.url=${SONAR_URL}'
+                    sh 'mvn sonar:sonar -Dsonar.login=${SONAR_AUTH_TOKEN} -Dsonar.host.url=${SONAR_URL}'
                 }
             }
         }
