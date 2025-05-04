@@ -47,7 +47,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image: ${IMAGE_NAME} with tag ${TAG}"
-                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} ."
+                sh "cd spring-boot-ci-cd && docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} ."
             }
         }
 
