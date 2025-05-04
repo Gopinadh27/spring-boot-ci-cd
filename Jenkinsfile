@@ -74,8 +74,8 @@ pipeline {
                        git config user.email "gopinadh@git.com"
                        git config user.name  "gopinadh"
                        BUILD_NUMBER = $BUILD_NUMBER
-                       sed -i 's/replaceImageTag/${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}/g' spring-boot-ci-cd/deployment.yml
-                       git add spring-boot-ci-cd/deployment.yml
+                       sh 'cd spring-boot-ci-cd && sed -i 's/replaceImageTag/${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}/g' deployment.yml
+                       git add deployment.yml
                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                        git push https://${GIT_HUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                        echo "deployment file updated successfully"
