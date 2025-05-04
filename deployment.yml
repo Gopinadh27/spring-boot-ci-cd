@@ -1,6 +1,6 @@
 services:
   user-service:
-    image: ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
+    image: replaceImageTag
     container_name: user_service
     ports:
       - "8080:2000"
