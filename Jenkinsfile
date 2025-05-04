@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'spring-boot-ci-cd'
+        DOCKER_REGISTRY = 'docker.io/ctli'
+        TAG = "${env.BUILD_NUMBER}"
+        SONAR_URL = 'http://localhost:9000'
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                echo "Cleaning workspace..."
+                deleteDir()
+            }
+        }
+
+        stage('Clone Repository') {
+            steps {
+                echo "Cloning repository..."
+                sh "git clone https://github.com/Gopinadh27/spring-boot-ci-cd.git"
+            }
+        }
+
+
+        stage('Build') {
+            steps {
+                echo 'Building Spring Boot application...'
+                sh '''
+                    cd spring-boot-ci-cd
+                    chmod 777 mvnw
+                    ./mvnw clean package -DskipTests
+                '''
+            }
+        }
+
+        stage('Static Code Analysis') {
+            steps {
+                withCredentials([string(credentialsId:'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh 'mvn sonar:sonar -Dsonar.login=${SONAR_AUTH_TOKEN} -Dsonar.host.url=${SONAR_URL}'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image: ${IMAGE_NAME} with tag ${TAG}"
+                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} spring-boot-ci-cd"
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                echo 'Pushing Docker image to registry...'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh '''echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'''
+                sh '''echo Successfully logged into docker registry...'''
+                sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}"
+                sh '''echo image pushed to docker registry successfully...'''
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                echo 'Cleaning up Docker image...'
+                sh "docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} || true"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}

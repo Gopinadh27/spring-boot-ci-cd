@@ -19,3 +19,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 }
+
+
+// squ_795f733c2b8e1d9c669204849729cf9c8dc11041
