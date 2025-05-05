@@ -1,6 +1,6 @@
 services:
   user-service:
-    image: replaceImageTag
+    image: docker.io/ctli/spring-boot-ci-cd:21
     container_name: user_service
     ports:
       - "8080:2000"
