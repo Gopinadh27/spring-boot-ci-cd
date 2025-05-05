@@ -104,18 +104,20 @@ pipeline {
                     string(credentialsId: 'ec2_host', variable: 'EC2_HOST'),
                     usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
                 ]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no -i ${EC2_PEM} ${EC2_USER}@${EC2_HOST} << 'EOF'
-                                sudo su -
-                                docker stop ${CONTAINER_NAME} || true
-                                docker rm ${CONTAINER_NAME} || true
-                                docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
-                                docker run -dit --name ${CONTAINER_NAME} -p 2000:2000 ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
-                        EOF
-                        """
+                    sh """
+                        ssh -o StrictHostKeyChecking=no -i ${EC2_PEM} ${EC2_USER}@${EC2_HOST} <<EOF
+                            sudo su -
+                            docker stop ${CONTAINER_NAME} || true
+                            docker rm ${CONTAINER_NAME} || true
+                            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+                            docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
+                            docker run -dit --name ${CONTAINER_NAME} -p 2000:2000 ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
+        EOF
+                    """
                 }
             }
         }
+
     }
 
     post {
