@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'spring-boot-ci-cd'
         DOCKER_REGISTRY = 'docker.io/ctli'
+        CONTAINER_NAME='user_service'
         TAG = "${env.BUILD_NUMBER}"
         SONAR_URL = 'http://sonarqube:9000'
     }
@@ -93,9 +94,34 @@ pipeline {
                 sh "docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} || true"
             }
         }
+
+        stage {
+            steps {
+                withCredentials(file(credentialsId: 'ec2_pem', variable:'EC2_PEM'),
+                                string(credentialsId: 'ec2_user', variable: 'EC2_USER'),
+                                string(credentialsId: 'ec2_host', variable: 'EC2_HOST'),
+                                usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
+                                ) {
+                sh '''echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'''
+                sh '''echo Successfully logged into docker registry...'''
+                    sh """
+                    ssh -o StrictHostKeyChecking=no -i ${EC2_PEM} ${EC2_USER}@${EC2_HOST} << 'EOF'
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                        docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
+                        docker run -dit --name ${CONTAINER_NAME} -p 2000:2000 ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}
+                    EOF
+                    """
+            }
+        }
     }
 
     post {
+        stages {
+            steps {
+
+            }
+        }
         success {
             echo 'Pipeline completed successfully!'
         }
